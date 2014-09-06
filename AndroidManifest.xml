@@ -6,6 +6,8 @@
 
     <!-- ネットワークを使用するパーミッション -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 録音のパーミッション -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
     <uses-sdk
         android:minSdkVersion="8"

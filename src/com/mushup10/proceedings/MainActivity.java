@@ -1,43 +1,48 @@
 package com.mushup10.proceedings;
 
+import java.util.ArrayList;
+
 import org.apache.http.HttpResponse;
 
 import com.mushup10.proceedings.HttpRequestTask.RequestFinishCallback;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
+
+  private static final String TAG = "proceedings";
+  private LoopRecognizer _loop;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    //AndroidからGetリクエストを飛ばす。処理
-    HttpGetRequestTask task = new HttpGetRequestTask(new RequestFinishCallback() {
 
-      //ServerErrorした時のcallback
-      @Override
-      public void serverError(int statusCode, String message, HttpResponse response) {
-        Log.d("proceedings", String.valueOf(statusCode));
-        Log.d("proceedings", message);
-        Log.d("proceedings", response.toString());
-      }
+    final TextView text = (TextView) findViewById(R.id.RecognizeResult);
+    _loop = new LoopRecognizer(this);
 
-      //正常にリクエストが返ってきた時のcallback
+    Button button = (Button) findViewById(R.id.RecognizeButton);
+    button.setOnClickListener(new OnClickListener() {
       @Override
-      public void complete(String result) {
-        Log.d("proceedings", result);
-      }
-
-      //ClientErrorした時のcallback
-      @Override
-      public void clientError(Exception e) {
-        Log.d("proceedings", e.getMessage());
+      public void onClick(View v) {
+        _loop.start();
       }
     });
-    //実際にリクエストを投げる。(引数はURLで複数個設定でき設定された順にリクエストを飛ばす)
-    task.execute("http://www.google.co.jp", "http://www.yahoo.co.jp/");
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    _loop.finish();
   }
 }
