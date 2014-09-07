@@ -6,12 +6,15 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.mushup10.proceedings.HttpRequestTask.RequestFinishCallback;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -99,6 +102,29 @@ public class LoopRecognizer{
 
     ArrayList<String> recData = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
     String rec = recData.get(index);
+    HttpPostRequestTask post = new HttpPostRequestTask(new RequestFinishCallback() {
+      @Override
+      public void serverError(int statusCode, String message, HttpResponse response) {
+        Log.d(TAG, "status:"+ statusCode + " message:" + message);
+      }
+
+      @Override
+      public void complete(String result) {
+        Log.d(TAG, "" + result);
+      }
+
+      @Override
+      public void clientError(Exception e) {
+        Log.d(TAG, e.getMessage());
+      }
+    });
+    SharedPreferences sp = Util.getCommonPreferences(_context);
+    Bundle params = new Bundle();
+    params.putString("voiceData", rec);
+    params.putString("macId", Util.getMachAddress(_context));
+    params.putString("meetingId", sp.getString("meetingId", ""));
+    post.setSendParams(params);
+    post.execute("http://mashup.cloudapp.net/proceeding/RemarkReceive");
   }
 
   public void start(){
