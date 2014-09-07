@@ -9,6 +9,8 @@
     <!-- 録音のパーミッション -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
     <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="20" />

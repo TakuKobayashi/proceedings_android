@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
 
   private static final String TAG = "proceedings";
   private LoopRecognizer _loop;
+  //private AudioRecordThread _audioRecord;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -30,11 +31,13 @@ public class MainActivity extends Activity {
 
     final TextView text = (TextView) findViewById(R.id.RecognizeResult);
     _loop = new LoopRecognizer(this);
+    //_audioRecord = new AudioRecordThread();
 
     Button button = (Button) findViewById(R.id.RecognizeButton);
     button.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
+        //_audioRecord.record();
         _loop.start();
       }
     });
@@ -43,6 +46,7 @@ public class MainActivity extends Activity {
   @Override
   protected void onDestroy() {
     super.onDestroy();
+    //_audioRecord.stop();
     _loop.finish();
   }
 }
