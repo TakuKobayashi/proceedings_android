@@ -3,6 +3,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <WebView
+        android:id="@+id/proceedingWebView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/RecognizeButton"
+    />
+
     <Button
         android:id="@+id/RecognizeButton"
         android:layout_width="match_parent"

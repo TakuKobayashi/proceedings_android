@@ -29,6 +29,7 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -150,5 +151,14 @@ public class Util{
       return defaultValue;
     }
     return Double.longBitsToDouble(sp.getLong(key, 0));
+  }
+
+  //WebViewを使用したときのメモリリーク対策
+  public static void releaseWebView(WebView webview){
+    webview.stopLoading();
+    webview.setWebChromeClient(null);
+    webview.setWebViewClient(null);
+    webview.destroy();
+    webview = null;
   }
 }

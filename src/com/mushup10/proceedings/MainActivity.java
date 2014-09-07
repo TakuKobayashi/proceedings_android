@@ -21,6 +21,8 @@ import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -28,6 +30,7 @@ public class MainActivity extends Activity {
 
   private static final String TAG = "proceedings";
   private LoopRecognizer _loop;
+  private WebView _webView;
   //private AudioRecordThread _audioRecord;
 
   @Override
@@ -36,6 +39,16 @@ public class MainActivity extends Activity {
     setContentView(R.layout.activity_main);
 
     _loop = new LoopRecognizer(this);
+    _webView = (WebView) findViewById(R.id.proceedingWebView);
+    _webView.loadUrl("http://asksun.net/analytics/index.html#myCarousel");
+    _webView.getSettings().setJavaScriptEnabled(true);
+    _webView.setWebViewClient(new WebViewClient(){
+      @Override
+      public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        return super.shouldOverrideUrlLoading(view, url);
+      }
+    });
+    //_webView.setVisibility(View.INVISIBLE);
     //_audioRecord = new AudioRecordThread();
 
     Button button = (Button) findViewById(R.id.RecognizeButton);
@@ -58,6 +71,7 @@ public class MainActivity extends Activity {
         try {
           JSONObject json = new JSONObject(result);
           Util.saveCommonParam(MainActivity.this, "meetingId", json.getString("meetingId"));
+          _webView.setVisibility(View.VISIBLE);
         } catch (JSONException e) {
           e.printStackTrace();
         }
@@ -78,6 +92,7 @@ public class MainActivity extends Activity {
   protected void onDestroy() {
     super.onDestroy();
     //_audioRecord.stop();
+    Util.releaseWebView(_webView);
     _loop.finish();
   }
 }
