@@ -7,14 +7,22 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.http.HttpResponse;
 
 import com.mushup10.proceedings.HttpRequestTask.RequestFinishCallback;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -105,5 +113,42 @@ public class Util{
     bt[2] = (byte)((value & 0x00ff0000) >> 16);
     bt[3] = (byte)((value & 0xff000000) >> 24);
     return bt;
+  }
+
+  public static String getMachAddress(Context context){
+    WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+    WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+    return wifiInfo.getMacAddress();
+  }
+
+  public static SharedPreferences getCommonPreferences(Context context){
+    return PreferenceManager.getDefaultSharedPreferences(context);
+  }
+
+  public static void saveCommonParam(Context context, String key, Object value){
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+    SharedPreferences.Editor editor = sp.edit();
+    if(value instanceof String){
+      editor.putString(key, (String) value);
+    }else if(value instanceof Integer){
+      editor.putInt(key, (Integer) value);
+    }else if(value instanceof Float){
+      editor.putFloat(key, (Float) value);
+    }else if(value instanceof Boolean){
+      editor.putBoolean(key, (Boolean) value);
+    }else if(value instanceof Long){
+      editor.putLong(key, (Long) value);
+    }else if(value instanceof Double){
+      long val = Double.doubleToRawLongBits((Double) value);
+      editor.putLong(key, val);
+    }
+    editor.commit();
+  }
+
+  public static double getDouble(SharedPreferences sp, String key, double defaultValue){
+    if ( !sp.contains(key)){
+      return defaultValue;
+    }
+    return Double.longBitsToDouble(sp.getLong(key, 0));
   }
 }
