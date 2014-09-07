@@ -9,7 +9,9 @@ import org.json.JSONObject;
 import com.mushup10.proceedings.HttpRequestTask.RequestFinishCallback;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
@@ -19,6 +21,7 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
@@ -31,13 +34,14 @@ public class MainActivity extends Activity {
   private static final String TAG = "proceedings";
   private LoopRecognizer _loop;
   private WebView _webView;
+  private boolean _isMeeting = false;
+  private Button _button;
   //private AudioRecordThread _audioRecord;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-
     _loop = new LoopRecognizer(this);
     _webView = (WebView) findViewById(R.id.proceedingWebView);
     _webView.loadUrl("http://asksun.net/analytics/index.html#myCarousel");
@@ -51,12 +55,18 @@ public class MainActivity extends Activity {
     //_webView.setVisibility(View.INVISIBLE);
     //_audioRecord = new AudioRecordThread();
 
-    Button button = (Button) findViewById(R.id.RecognizeButton);
-    button.setOnClickListener(new OnClickListener() {
+    _button = (Button) findViewById(R.id.RecognizeButton);
+    _button.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
         //_audioRecord.record();
-        _loop.start();
+        if(_isMeeting){
+          showDialog();
+        }else{
+          _loop.start();
+          _isMeeting = true;
+          _button.setText(MainActivity.this.getString(R.string.finishMeeting));
+        }
       }
     });
     HttpPostRequestTask post = new HttpPostRequestTask(new RequestFinishCallback() {
@@ -85,7 +95,41 @@ public class MainActivity extends Activity {
     Bundle params = new Bundle();
     params.putString("macId", Util.getMachAddress(this));
     post.setSendParams(params);
-    post.execute("http://mashup.cloudapp.net/proceeding/MeetingStart");
+    post.execute("http://mashup.cloudapp.net:8080/ma10remark/MeetingStart");
+  }
+
+  private void showDialog(){
+    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+    alertDialogBuilder.setTitle(MainActivity.this.getResources().getString(R.string.confirmDialogTitle));
+    alertDialogBuilder.setMessage(MainActivity.this.getResources().getString(R.string.confirmDialogMessage));
+    alertDialogBuilder.setCancelable(false);
+    alertDialogBuilder.setPositiveButton(MainActivity.this.getResources().getString(R.string.acceptButton), new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int which) {
+          _button.setVisibility(View.GONE);
+          _isMeeting = false;
+          _loop.finish();
+          _webView.loadUrl("http://asksun.net/analytics/index-mem.html#myCarousel");
+        }
+    });
+    alertDialogBuilder.setNegativeButton(MainActivity.this.getResources().getString(R.string.cancelButton), new DialogInterface.OnClickListener() {
+        public void onClick(DialogInterface dialog, int which) {
+
+        }
+    });
+    alertDialogBuilder.create().show();
+  }
+
+  public boolean onKeyDown(int keyCode, KeyEvent event) {
+    //バックボタンを押したときの処理
+    if(keyCode == KeyEvent.KEYCODE_BACK){
+      if(_isMeeting){
+        showDialog();
+      }else{
+        this.finish();
+      }
+    }
+
+    return true;
   }
 
   @Override

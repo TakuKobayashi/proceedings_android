@@ -3,5 +3,11 @@
 
     <string name="app_name">proceedings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="startButton">ブレストスタート!!!</string>
+    <string name="confirmDialogTitle">確認</string>
+    <string name="acceptButton">はい</string>
+    <string name="cancelButton">いいえ</string>
+    <string name="finishMeeting">ブレストを終了する</string>
+    <string name="confirmDialogMessage">ブレストを終了しますか?</string>
 
 </resources>

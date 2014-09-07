@@ -124,7 +124,7 @@ public class LoopRecognizer{
     params.putString("macId", Util.getMachAddress(_context));
     params.putString("meetingId", sp.getString("meetingId", ""));
     post.setSendParams(params);
-    post.execute("http://mashup.cloudapp.net/proceeding/RemarkReceive");
+    post.execute("http://mashup.cloudapp.net:8080/ma10remark/RemarkReceive");
   }
 
   public void start(){
