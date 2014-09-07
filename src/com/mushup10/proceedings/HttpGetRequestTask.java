@@ -46,6 +46,7 @@ public class HttpGetRequestTask extends HttpRequestTask {
       }finally{
         httpClient.getConnectionManager().shutdown();
       }
+      if(httpResponse == null || httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) return null;
       publishProgress(returnData);
     }
     return null;
