@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class Util{
@@ -161,4 +163,49 @@ public class Util{
     webview.destroy();
     webview = null;
   }
+
+  public static void releaseImageView(ImageView imageView){
+    if (imageView != null) {
+      BitmapDrawable bitmapDrawable = (BitmapDrawable)(imageView.getDrawable());
+      if (bitmapDrawable != null) {
+        bitmapDrawable.setCallback(null);
+      }
+      imageView.setImageBitmap(null);
+    }
+  }
+
+//---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  public static String makeUrlParams(Map<String, Object> params){
+    Set<String> keys = params.keySet();
+    ArrayList<String> paramList = new ArrayList<String>();
+    for(Entry<String, Object> e : params.entrySet()) {
+      paramList.add(e.getKey() + "=" + e.getValue().toString());
+    }
+    return Util.join(paramList, "&");
+  }
+
+  //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  public static String join(String[] list, String with) {
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < list.length; i++) {
+    if (i != 0) { buf.append(with);}
+      buf.append(list[i]);
+    }
+    return buf.toString();
+  }
+
+  //---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+  public static String join(ArrayList<String> list, String with) {
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < list.size(); i++) {
+      if (i != 0) { buf.append(with);}
+      buf.append(list.get(i));
+    }
+    return buf.toString();
+  }
+
+  //---------------------------------------------------------------------------------------------------------------------------------------------------------------
 }
