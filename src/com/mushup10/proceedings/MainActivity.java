@@ -80,7 +80,7 @@ public class MainActivity extends Activity {
         Log.d(TAG, "" + result);
         try {
           JSONObject json = new JSONObject(result);
-          Util.saveCommonParam(MainActivity.this, "meetingId", json.getString("meetingId"));
+          Util.saveCommonParam(MainActivity.this, "token", json.getString("token"));
           _webView.setVisibility(View.VISIBLE);
         } catch (JSONException e) {
           e.printStackTrace();
@@ -92,10 +92,11 @@ public class MainActivity extends Activity {
         Log.d(TAG, e.getMessage());
       }
     });
+    SharedPreferences sp = Util.getCommonPreferences(this);
     Bundle params = new Bundle();
-    params.putString("macId", Util.getMachAddress(this));
+    params.putString("auth_token", sp.getString("auth_token", ""));
     post.setSendParams(params);
-    post.execute("http://mashup.cloudapp.net:8080/ma10remark/MeetingStart");
+    post.execute(Util.join(new String[]{Config.ROOT_URL,"api", "speeches", "start"}, "/"));
   }
 
   private void showDialog(){
@@ -105,10 +106,33 @@ public class MainActivity extends Activity {
     alertDialogBuilder.setCancelable(false);
     alertDialogBuilder.setPositiveButton(MainActivity.this.getResources().getString(R.string.acceptButton), new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
-          _button.setVisibility(View.GONE);
-          _isMeeting = false;
-          _loop.finish();
-          _webView.loadUrl("http://asksun.net/analytics/index-mem.html#myCarousel");
+            HttpPostRequestTask post = new HttpPostRequestTask(new RequestFinishCallback() {
+              @Override
+              public void serverError(int statusCode, String message, HttpResponse response) {
+                Log.d(TAG, "status:"+ statusCode + " message:" + message);
+              }
+
+              @Override
+              public void complete(String result) {
+                Log.d(TAG, "" + result);
+              }
+
+              @Override
+              public void clientError(Exception e) {
+                Log.d(TAG, e.getMessage());
+              }
+            });
+            SharedPreferences sp = Util.getCommonPreferences(MainActivity.this);
+            Bundle params = new Bundle();
+            params.putString("auth_token", sp.getString("auth_token", ""));
+            params.putString("token", sp.getString("token", ""));
+            post.setSendParams(params);
+            post.execute(Util.join(new String[]{Config.ROOT_URL,"api", "speeches", "stop"}, "/"));
+            Preferences.removeCommonParam(MainActivity.this, "token");
+            _button.setVisibility(View.GONE);
+            _isMeeting = false;
+            _loop.finish();
+            _webView.loadUrl("http://asksun.net/analytics/index-mem.html#myCarousel");
         }
     });
     alertDialogBuilder.setNegativeButton(MainActivity.this.getResources().getString(R.string.cancelButton), new DialogInterface.OnClickListener() {

@@ -1,13 +1,18 @@
 package com.mushup10.proceedings;
 
+import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
+import java.util.TreeSet;
+
+import jp.co.nttit.EnterVoiceSP.service.helper.SpeechRecServiceHelper;
+import jp.co.nttit.EnterVoiceSP.service.helper.VoiceRecognitionEventListener;
+import jp.co.nttit.EnterVoiceSP.service.util.DivideFileManager;
 
 import org.apache.http.HttpResponse;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -27,18 +32,51 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class LoopRecognizer{
+public class DocomoLoopRecognizer{
 
   private Context _context;
-  private SpeechRecognizer _speechRecognizer;
+  private DivideFileManager _divideFileManager;
+  private SpeechRecServiceHelper _speechRecHelper;
   private static final String TAG = "proceedings";
 
-  public LoopRecognizer(Context context){
+  public DocomoLoopRecognizer(Context context){
+    /*
+    _speechRecHelper = new SpeechRecServiceHelper();
+    _divideFileManager = new DivideFileManager(context);
+    if (!divideFileManager.isExtracted()) {
+			try {
+				divideFileManager.extract();
+			} catch (IOException e) {
+				showErrorDialog(e.getMessage());
+				return;
+			}
+		}
+		
+    bundle = new Bundle();
+	// Bundle にインテントの値（SBMモード、APIキー）を追加
+	Intent intent = getIntent();
+	bundle.putAll(intent.getExtras());
+	// Bundle に区間検出モデルファイルを追加
+	bundle.putString(KEY_VAD_MODEL, divideFileManager.getDivideModelPath());
+
+	for (String key : new TreeSet<String>(bundle.keySet())) {
+		Object value = bundle.get(key);
+		String name = null;
+		if (value != null) {
+			name = value.getClass().getSimpleName();
+		}
+		String s = MessageFormat.format("{0}={1} ({2})", key, value, name);
+		Log.d(TAG, s);
+	}
+
+	Log.d(TAG, "helper.connect()");
+	// 音声認識サービスと接続
+	helper.connect(this, this);
     _speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context);
     _speechRecognizer.setRecognitionListener(new RecognitionListener() {
       @Override
       public void onRmsChanged(float rmsdB) {
-        //Log.d(TAG, "onRmsChanged:" + rmsdB);
+        Log.d(TAG, "onRmsChanged:" + rmsdB);
       }
 
       @Override
@@ -92,20 +130,18 @@ public class LoopRecognizer{
   }
 
   private void resultAction(Bundle results){
+    int index = 0;
+    float max = -1;
     float[] confidence = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
-    ArrayList<String> recData = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-    JSONArray json = new JSONArray();
     for(int i = 0;i < confidence.length;++i){
-      JSONObject ob = new JSONObject();
-      try {
-        ob.put("confidence", confidence[i]);
-        ob.put("candidate", recData.get(i));
-        json.put(ob);
-      } catch (JSONException e1) {
-        e1.printStackTrace();
+      if(confidence[i] > max){
+        max = confidence[i];
+        index = i;
       }
     }
 
+    ArrayList<String> recData = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+    String rec = recData.get(index);
     HttpPostRequestTask post = new HttpPostRequestTask(new RequestFinishCallback() {
       @Override
       public void serverError(int statusCode, String message, HttpResponse response) {
@@ -124,13 +160,11 @@ public class LoopRecognizer{
     });
     SharedPreferences sp = Util.getCommonPreferences(_context);
     Bundle params = new Bundle();
-    String locale = Locale.getDefault().toString();
-    params.putString("recognized", json.toString());
-    params.putString("language_code", locale);
-    params.putString("token", sp.getString("token", ""));
-    params.putString("auth_token", sp.getString("auth_token", ""));
+    params.putString("voiceData", rec);
+    params.putString("macId", Util.getMachAddress(_context));
+    params.putString("meetingId", sp.getString("meetingId", ""));
     post.setSendParams(params);
-    post.execute(Util.join(new String[]{Config.ROOT_URL,"api", "speeches", "speak"}, "/"));
+    post.execute("http://mashup.cloudapp.net:8080/ma10remark/RemarkReceive");
   }
 
   public void start(){
@@ -142,6 +176,7 @@ public class LoopRecognizer{
 
   public void finish(){
     _speechRecognizer.stopListening();
-    _speechRecognizer.destroy();
+    _speechRecognizer.destroy();*/
   }
+
 }

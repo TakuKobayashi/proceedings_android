@@ -81,6 +81,13 @@ public class Preferences{
     editor.commit();
   }
 
+  public static void removeCommonParam(Context context, String key){
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+    SharedPreferences.Editor editor = sp.edit();
+    editor.remove(key);
+    editor.commit();
+  }
+
   public static double getDouble(SharedPreferences sp, String key, double defaultValue){
     if ( !sp.contains(key)){
       return defaultValue;
